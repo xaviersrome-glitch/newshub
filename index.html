@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewsHub — Live Finance, Tech, Military & World News</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ── Stocks / Crypto Live Bar ── -->
+  <div class="market-bar" id="market-bar">
+    <div class="market-inner" id="market-inner">
+      <span class="market-loading">Loading market data...</span>
+    </div>
+  </div>
+
+  <!-- ── Utility Bar ── -->
+  <div class="utility-bar">
+    <div class="utility-inner">
+      <div class="utility-left">
+        <span id="live-clock"></span>
+        <span class="u-sep">·</span>
+        <span id="article-count">Loading...</span>
+      </div>
+      <div class="utility-right">
+        <span id="feed-status-dot" class="status-dot"></span>
+        <span id="feed-status">Connecting...</span>
+        <span class="u-sep">·</span>
+        <button id="refresh-btn" class="u-refresh-btn">↻ Refresh</button>
+        <label class="u-auto-label">
+          <input type="checkbox" id="auto-refresh" checked /> Auto (5m)
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Header ── -->
+  <header class="main-header">
+    <div class="header-inner">
+      <a href="#" class="logo">News<span>Hub</span></a>
+      <div class="header-search">
+        <div class="search-wrap">
+          <svg class="search-icon" viewBox="0 0 20 20" fill="none" width="16" height="16">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="#999" stroke-width="1.8"/>
+            <path d="M13 13l3.5 3.5" stroke="#999" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search news, topics, sources..." autocomplete="off" />
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="api-key-toggle" id="api-key-toggle">⚙ Settings</button>
+        <div class="api-key-dropdown hidden" id="api-key-dropdown">
+          <h4>NewsAPI.org Key</h4>
+          <p>Get a free key at <a href="https://newsapi.org/register" target="_blank">newsapi.org</a> for 100+ extra sources/day</p>
+          <div class="api-key-row">
+            <input type="text" id="newsapi-key" placeholder="Paste your API key..." />
+            <button id="save-key-btn">Save</button>
+          </div>
+          <div class="settings-divider"></div>
+          <h4>Finnhub API Key <span class="optional">(optional)</span></h4>
+          <p>For live stock prices — free at <a href="https://finnhub.io/register" target="_blank">finnhub.io</a></p>
+          <div class="api-key-row">
+            <input type="text" id="finnhub-key" placeholder="Paste Finnhub key..." />
+            <button id="save-finnhub-btn">Save</button>
+          </div>
+          <button class="skip-btn" id="dismiss-notice">Close</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Category Nav ── -->
+  <nav class="cat-nav">
+    <div class="cat-nav-inner">
+      <button class="cn-btn active" data-cat="all">All</button>
+      <button class="cn-btn" data-cat="finance">Finance</button>
+      <button class="cn-btn" data-cat="tech">Tech &amp; AI</button>
+      <button class="cn-btn" data-cat="military">Military</button>
+      <button class="cn-btn" data-cat="world">World</button>
+      <button class="cn-btn" data-cat="politics">Politics</button>
+      <button class="cn-btn" data-cat="crypto">Crypto</button>
+      <button class="cn-btn" data-cat="sports">Sports</button>
+      <div class="cn-divider"></div>
+      <button class="src-pill active" data-src="all">All Sources</button>
+      <button class="src-pill" data-src="rss">RSS</button>
+      <button class="src-pill" data-src="reddit">Reddit</button>
+      <button class="src-pill" data-src="hackernews">Hacker News</button>
+    </div>
+  </nav>
+
+  <!-- ── News Ticker ── -->
+  <div class="news-ticker-strip">
+    <span class="ticker-label">LIVE</span>
+    <div class="ticker-track">
+      <div class="ticker-inner" id="ticker-inner">Fetching headlines...</div>
+    </div>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <main class="page-main">
+    <div class="page-inner">
+
+      <!-- Left: hero + feed -->
+      <div class="main-col">
+
+        <!-- Hero -->
+        <section class="hero-section" id="hero-section">
+          <div class="hero-skeleton">
+            <div class="sk-img"></div>
+            <div class="sk-lines">
+              <div class="sk-line wide"></div>
+              <div class="sk-line"></div>
+              <div class="sk-line short"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Sort bar -->
+        <div class="sort-bar">
+          <div class="sort-left">
+            <span class="sort-heading">Latest Stories</span>
+            <span class="sort-count" id="sort-count"></span>
+          </div>
+          <div class="sort-right">
+            <span class="sort-label">Sort:</span>
+            <button class="sort-opt active" data-sort="date">Newest</button>
+            <button class="sort-opt" data-sort="source">Source</button>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="news-grid" id="news-grid"></div>
+
+        <!-- Load more -->
+        <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+          <button class="load-more-btn" id="load-more-btn">Load more stories</button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="side-col">
+
+        <!-- Mini market widget -->
+        <div class="widget market-widget">
+          <div class="widget-hd">📊 Markets</div>
+          <div id="market-sidebar" class="market-sidebar">
+            <div class="market-loading-sm">Loading prices...</div>
+          </div>
+        </div>
+
+        <!-- Trending -->
+        <div class="widget">
+          <div class="widget-hd">🔥 Trending Topics</div>
+          <div id="trending-list"></div>
+        </div>
+
+        <!-- Reddit -->
+        <div class="widget">
+          <div class="widget-hd">Reddit Hot</div>
+          <div id="reddit-sidebar"></div>
+        </div>
+
+        <!-- HN -->
+        <div class="widget">
+          <div class="widget-hd">▲ Hacker News</div>
+          <div id="hn-sidebar"></div>
+        </div>
+
+        <!-- Twitter note -->
+        <div class="widget tw-widget">
+          <div class="widget-hd">𝕏 Twitter / X</div>
+          <div class="tw-body">
+            <p>X API requires a paid plan ($100+/mo).</p>
+            <p class="tw-alt">💡 <strong>Free workaround:</strong> Add a <a href="https://github.com/zedeus/nitter" target="_blank">Nitter</a> RSS URL to <code>RSS_FEEDS</code> in <code>config.js</code>.</p>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-logo">NewsHub</span>
+      <span class="f-sep">·</span>
+      <span id="last-refresh">Never refreshed</span>
+      <span class="f-sep">·</span>
+      <a href="https://github.com" target="_blank">GitHub</a>
+      <span class="f-sep">·</span>
+      <a href="https://newsapi.org" target="_blank">NewsAPI</a>
+      <span class="f-sep">·</span>
+      <a href="https://finnhub.io" target="_blank">Finnhub</a>
+      <span class="f-sep">·</span>
+      <span>Market data: CoinGecko + Finnhub (free)</span>
+    </div>
+  </footer>
+
+  <!-- Modal -->
+  <div id="article-modal" class="modal hidden">
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="modal-box">
+      <div class="modal-bar">
+        <div class="modal-badges">
+          <span class="m-cat" id="modal-cat"></span>
+          <span class="m-src" id="modal-src"></span>
+        </div>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-img-wrap hidden" id="modal-img-wrap">
+        <img id="modal-img" src="" alt="" loading="lazy" />
+      </div>
+      <div class="modal-body">
+        <h2 id="modal-title"></h2>
+        <div class="modal-meta">
+          <span id="modal-date"></span>
+          <span id="modal-author"></span>
+        </div>
+        <p id="modal-desc"></p>
+        <a id="modal-link" href="#" target="_blank" class="modal-cta">Read full story →</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
